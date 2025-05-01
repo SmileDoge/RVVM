@@ -26,13 +26,13 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/.
 #if !defined(UNDER_CE)
 
 // Win32 futexes (RtlWaitOnAddress(), Win8+)
-static BOOL (*__stdcall rtl_wait_on_addr)(const void*, const void*, size_t, const LARGE_INTEGER*) = NULL;
-static void (*__stdcall rtl_wake_by_addr_single)(const void*)                                     = NULL;
-static void (*__stdcall rtl_wake_by_addr_all)(const void*)                                        = NULL;
+static BOOL (__stdcall* rtl_wait_on_addr)(const void*, const void*, size_t, const LARGE_INTEGER*) = NULL;
+static void (__stdcall* rtl_wake_by_addr_single)(const void*)                            = NULL;
+static void (__stdcall* rtl_wake_by_addr_all)(const void*)                                         = NULL;
 
 // Precise waitable timers (CreateWaitableTimerExW(CREATE_WAITABLE_TIMER_HIGH_RESOLUTION), Win10 1803+)
-static HANDLE (*__stdcall create_waitable_timer_ex_w)(void*, LPCWSTR, DWORD, DWORD)                    = NULL;
-static BOOL   (*__stdcall set_waitable_timer)(HANDLE, const LARGE_INTEGER*, LONG, void*, LPVOID, BOOL) = NULL;
+static HANDLE (__stdcall* create_waitable_timer_ex_w)(void*, LPCWSTR, DWORD, DWORD)                   = NULL;
+static BOOL   (__stdcall* set_waitable_timer)(HANDLE, const LARGE_INTEGER*, LONG, void*, LPVOID, BOOL) = NULL;
 
 #define WIN32_FUTEX_IMPL          1
 #define WIN32_WAITABLE_TIMER_IMPL 1

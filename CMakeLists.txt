@@ -167,7 +167,7 @@ if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 # Check JIT support for target
-if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86|amd64|i386|aarch64|arm|riscv)")
+if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86|amd64|AMD64|i386|aarch64|arm|riscv)")
 	message(WARNING "Unsupported RVJIT target! RVJIT won't be built")
 	set(USE_JIT OFF)
 endif()

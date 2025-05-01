@@ -39,7 +39,7 @@ static uint32_t qpc_crit = 0;
 static uint64_t qpc_off = 0, qpc_last = 0, qpc_freq = 0;
 static uint64_t qpc_last_checked = 0, uit_last_checked = 0;
 
-static BOOL (*__stdcall query_uit)(PULONGLONG) = NULL;
+static BOOL (__stdcall* query_uit)(PULONGLONG) = NULL;
 
 static uint64_t qpc_get_frequency(void)
 {

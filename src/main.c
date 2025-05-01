@@ -307,8 +307,8 @@ int main(int argc, char** argv)
 {
 #if defined(_WIN32) && !defined(UNDER_CE)
     // Prefer UTF-8 arguments on Windows whenever GetCommandLineW() & CommandLineToArgvW() are available
-    LPWSTR  (*__stdcall get_command_line_w)(void)              = NULL;
-    LPWSTR* (*__stdcall command_line_to_argv_w)(LPCWSTR, int*) = NULL;
+    LPWSTR  (__stdcall* get_command_line_w)(void)              = NULL;
+    LPWSTR* (__stdcall* command_line_to_argv_w)(LPCWSTR, int*) = NULL;
     get_command_line_w     = (void*)GetProcAddress(LoadLibraryW(L"kernel32.dll"), "GetCommandLineW");
     command_line_to_argv_w = (void*)GetProcAddress(LoadLibraryW(L"shell32.dll"), "CommandLineToArgvW");
 

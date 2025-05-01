@@ -440,6 +440,27 @@ void riscv_hart_run(rvvm_hart_t* vm)
     }
 }
 
+void riscv_hart_step(rvvm_hart_t* vm)
+{
+    atomic_store_uint32_ex(&vm->running, false, ATOMIC_RELAXED);
+
+    uint32_t events = atomic_swap_uint32(&vm->pending_events, 0);
+    if (unlikely(events)) {
+        if (events & HART_EVENT_PAUSE) {
+            return;
+        }
+    }
+
+    riscv_handle_irqs(vm);
+
+    riscv_run_till_event(vm);
+
+    if (vm->trap) {
+        vm->registers[RISCV_REG_PC] = vm->trap_pc;
+        vm->trap                    = false;
+    }
+}
+
 static void* riscv_hart_run_thread(void* ptr)
 {
     rvvm_hart_t* vm = ptr;

@@ -294,6 +294,54 @@ static bool rvvm_eventloop_tick(bool manual)
     return ret;
 }
 
+static bool rvvm_eventloop_tick_machine(bool manual, rvvm_machine_t* machine)
+{
+    bool ret = false;
+
+    uint32_t power_state = atomic_load_uint32(&machine->power_state);
+
+    if (power_state == RVVM_POWER_ON) {
+        vector_foreach (machine->harts, i) {
+            rvvm_hart_t* vm = vector_at(machine->harts, i);
+            // Сheck hart timer interrupts
+            riscv_hart_check_timer(vector_at(machine->harts, i));
+            if (rvvm_get_opt(machine, RVVM_OPT_MAX_CPU_CENT) < 100) {
+                uint32_t preempt = 10 - ((10 * rvvm_get_opt(machine, RVVM_OPT_MAX_CPU_CENT) + 9) / 100);
+                riscv_hart_preempt(vm, preempt);
+            }
+        }
+
+        vector_foreach (machine->mmio_devs, i) {
+            rvvm_mmio_dev_t* dev = vector_at(machine->mmio_devs, i);
+            if (dev->type && dev->type->update) {
+                // Update device
+                dev->type->update(dev);
+            }
+        }
+    } else {
+        // The machine was shut down or reset
+        vector_foreach (machine->harts, i) {
+            riscv_hart_pause(vector_at(machine->harts, i));
+        }
+        // Call reset/poweroff handler
+        if (power_state == RVVM_POWER_RESET) {
+            rvvm_info("Machine %p resetting", machine);
+            rvvm_reset_machine_state(machine);
+            vector_foreach (machine->harts, i) {
+                riscv_hart_spawn(vector_at(machine->harts, i));
+            }
+        } else {
+            rvvm_info("Machine %p shutting down", machine);
+            atomic_store_uint32(&machine->running, false);
+            if (manual) {
+                // Return from manual eventloop whenever a machine powers down
+                ret = true;
+            }
+        }
+    }
+    return ret;
+}
+
 #ifdef __EMSCRIPTEN__
 
 // Implement proper Emscripten eventloop instead of a built-in one
@@ -707,6 +755,68 @@ PUBLIC void rvvm_run_eventloop(void)
     rvvm_set_manual_eventloop(true);
     rvvm_eventloop((void*)(size_t)1);
     rvvm_set_manual_eventloop(false);
+}
+
+// External
+
+PUBLIC void rvvm_external_tick_eventloop(bool manual)
+{
+    spin_lock(&global_lock);
+    rvvm_eventloop_tick(!!manual);
+    spin_unlock(&global_lock);
+}
+
+PUBLIC void rvvm_external_set_manual(bool manual)
+{
+    rvvm_set_manual_eventloop(manual);
+}
+
+PUBLIC void rvvm_external_init_single_step(rvvm_machine_t* machine)
+{
+    spin_lock(&global_lock);
+
+    rvvm_reset_machine_state(machine);
+
+    vector_foreach (machine->harts, i) {
+        riscv_hart_prepare(vector_at(machine->harts, i));
+    }
+    vector_foreach (machine->harts, i) {
+        rvvm_hart_t* vm = vector_at(machine->harts, i);
+
+        atomic_store_uint32(&vm->pending_events, 0);
+        riscv_csr_sync_fpu(vm);
+    }
+
+    vector_push_back(global_machines, machine);
+    spin_unlock(&global_lock);
+
+    rvvm_reconfigure_eventloop();
+}
+
+PUBLIC void rvvm_external_step_machine(rvvm_machine_t* machine, uint16_t hart_id)
+{
+    if (hart_id == -1) {
+        vector_foreach (machine->harts, i) {
+            riscv_hart_step(vector_at(machine->harts, i));
+        }
+    } else {
+        riscv_hart_step(vector_at(machine->harts, hart_id));
+    }
+}
+
+PUBLIC void rvvm_external_global_lock(void)
+{
+    spin_lock(&global_lock);
+}
+
+PUBLIC void rvvm_external_global_unlock(void)
+{
+    spin_unlock(&global_lock);
+}   
+
+PUBLIC void rvvm_external_eventloop_tick_machine(rvvm_machine_t* machine)
+{
+    rvvm_eventloop_tick_machine(true, machine);
 }
 
 /*

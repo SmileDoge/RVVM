@@ -144,6 +144,22 @@ PUBLIC void rvvm_free_machine(rvvm_machine_t* machine);
 //! \brief Run the event loop in the calling thread, returns when any machine is paused or powered off
 PUBLIC void rvvm_run_eventloop(void);
 
+
+
+PUBLIC void rvvm_external_tick_eventloop(bool manual);
+
+PUBLIC void rvvm_external_set_manual(bool manual);
+
+PUBLIC void rvvm_external_init_single_step(rvvm_machine_t* machine);
+
+PUBLIC void rvvm_external_step_machine(rvvm_machine_t* machine, uint16_t hart_id);
+
+PUBLIC void rvvm_external_eventloop_tick_machine(rvvm_machine_t* machine);
+
+PUBLIC void rvvm_external_global_lock();
+
+PUBLIC void rvvm_external_global_unlock();
+
 /** @}*/
 
 /**

@@ -8,6 +8,7 @@
 
 # CMake default build path
 /build/
+/build_64/
 
 # CMake garbage if someone tries in-source build
 CMakeFiles/

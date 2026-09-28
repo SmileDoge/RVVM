@@ -244,16 +244,16 @@ static int rvvm_cli_main(int argc, char** argv)
         riscv_plic_init_auto(machine);
     }
 
-    pci_bus_init_auto(machine);
-    i2c_oc_init_auto(machine);
+    //pci_bus_init_auto(machine);
+    //i2c_oc_init_auto(machine);
 
     // usb_xhci_init(rvvm_get_pci_bus(machine));
 
-    rtc_goldfish_init_auto(machine);
-    syscon_init_auto(machine);
+    //rtc_goldfish_init_auto(machine);
+    //syscon_init_auto(machine);
 
     if (rvvm_has_arg("gdbstub")) {
-        gdbstub_init(machine, rvvm_getarg("gdbstub"));
+        //gdbstub_init(machine, rvvm_getarg("gdbstub"));
     }
 
     if (!rvvm_has_arg("serial")) {
@@ -261,7 +261,7 @@ static int rvvm_cli_main(int argc, char** argv)
     }
 
     if (!rvvm_has_arg("nogui") && !rvvm_has_arg("res")) {
-        gui_window_init_auto(machine, 640, 480);
+        //gui_window_init_auto(machine, 640, 480);
     }
 
     tap_dev_t* tap = NULL;

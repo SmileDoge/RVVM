@@ -79,9 +79,9 @@ endif()
 # Set up source & binary dirs, compiler & target specific build options
 #
 
-set(RVVM_INC_DIR "${CMAKE_SOURCE_DIR}/include")
-set(RVVM_SRC_DIR "${CMAKE_SOURCE_DIR}/src")
-set(RVVM_SRC_DIR "${CMAKE_SOURCE_DIR}/src/util")
+set(RVVM_INC_DIR  "${CMAKE_SOURCE_DIR}/include")
+set(RVVM_SRC_DIR  "${CMAKE_SOURCE_DIR}/src")
+set(RVVM_UTIL_DIR "${CMAKE_SOURCE_DIR}/src/util")
 
 # Fancy coloring
 if (NOT WIN32)
@@ -124,18 +124,18 @@ endif()
 
 # Common pseudo-library to pass parameters to other targets
 add_library(rvvm_common INTERFACE)
-target_include_directories(rvvm_common INTERFACE "${RVVM_INC_DIR}" "${RVVM_SRC_DIR}")
+target_include_directories(rvvm_common INTERFACE "${RVVM_INC_DIR}" "${RVVM_SRC_DIR}" "${RVVM_UTIL_DIR}")
 target_compile_definitions(rvvm_common INTERFACE "RVVM_VERSION=\"${RVVM_VERSION}\"")
 
 # Check and enable LTO
-include(CheckIPOSupported)
-check_ipo_supported(RESULT lto_supported OUTPUT lto_error)
+# include(CheckIPOSupported)
+# check_ipo_supported(RESULT lto_supported OUTPUT lto_error)
 
-if (lto_supported)
-	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-else()
-	message(STATUS "${COLLOR_YELLOW}LTO is not supported by this toolchain: ${lto_error}")
-endif()
+# if (lto_supported)
+# 	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+# else()
+# 	message(STATUS "${COLLOR_YELLOW}LTO is not supported by this toolchain: ${lto_error}")
+# endif()
 
 if (MSVC)
 	# Suppress warnings: casts between int sizes, unsigned minus, cast after shift
@@ -172,7 +172,7 @@ if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 # Check JIT support for target
-if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86|amd64|i386|aarch64|arm|riscv)")
+if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86|amd64|AMD64|i386|aarch64|arm|riscv)")
 	message(WARNING "Unsupported RVJIT target! RVJIT won't be built")
 	set(USE_JIT OFF)
 endif()

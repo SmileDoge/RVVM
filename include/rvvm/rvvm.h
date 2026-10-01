@@ -155,6 +155,11 @@ RVVM_PUBLIC void rvvm_free_machine(rvvm_machine_t* machine);
  */
 RVVM_PUBLIC void rvvm_run_eventloop(void);
 
+/**
+ * Tick the event loop in the calling thread
+ */
+RVVM_PUBLIC void rvvm_external_tick_eventloop(bool manual);
+
 /** @}*/
 
 /**

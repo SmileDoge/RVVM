@@ -816,6 +816,13 @@ PUBLIC void rvvm_run_eventloop(void)
     rvvm_set_manual_eventloop(false);
 }
 
+RVVM_PUBLIC void rvvm_external_tick_eventloop(bool manual)
+{
+    spin_lock(&global_lock);
+    rvvm_eventloop_tick(!!manual);
+    spin_unlock(&global_lock);
+}
+
 /*
  * RVVM Device API
  */
